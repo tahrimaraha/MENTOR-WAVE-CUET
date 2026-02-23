@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Mentor Wave CUET</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fff;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .messaging-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- CONVERSATIONS SIDEBAR --- */
+        .conversations-sidebar {
+            width: 320px;
+            background-color: #fff;
+            border-right: 1px solid #e5e5ea;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .conversations-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e5ea;
+        }
+
+        .conversations-header h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 16px;
+            border: 1px solid #e5e5ea;
+            border-radius: 20px;
+            background-color: #f0f0f0;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-box:focus {
+            background-color: #ffffff;
+            border-color: #007AFF;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation-item {
+            padding: 8px 8px;
+            margin: 0 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .conversation-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .conversation-item.active {
+            background-color: #e5e5ea;
+        }
+
+        .conv-avatar {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .conv-avatar.av2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .conv-avatar.av3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .conv-avatar.av4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .conv-avatar.av5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        .conv-online-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 14px;
+            height: 14px;
+            background-color: #31a24c;
+            border: 3px solid white;
+            border-radius: 50%;
+        }
+
+        .conv-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .conv-name {
+            font-weight: 600;
+            color: #000;
+            font-size: 15px;
+        }
+
+        .conv-time {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .conv-preview {
+            font-size: 13px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- CHAT AREA --- */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e5ea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .chat-header-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 2px;
+        }
+
+        .chat-header-info p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: #fff;
+        }
+
+        .message-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-group.sent {
+            justify-content: flex-end;
+        }
+
+        .message {
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            max-width: 70%;
+        }
+
+        .message.received {
+            background-color: #e5e5ea;
+            color: #000;
+        }
+
+        .message.sent {
+            background-color: #31a24c;
+            color: white;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* --- INPUT AREA --- */
+        .chat-input-container {
+            padding: 12px 20px;
+            background-color: #fff;
+            border-top: 1px solid #e5e5ea;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #e5e5ea;
+            border-radius: 20px;
+            outline: none;
+            font-family: inherit;
+            resize: none;
+            background-color: #f0f0f0;
+            font-size: 15px;
+        }
+
+        .chat-input:focus {
+            background-color: #ffffff;
+            border-color: #007AFF;
+        }
+
+        .send-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #007AFF;
+        }
+
+        .send-btn:hover {
+            opacity: 0.7;
+        }
+
+        #backDashboardLink {
+            background: none;
+            border: none;
+            color: #007AFF;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        #backDashboardLink:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="messaging-container">
+        <!-- Conversations Sidebar -->
+        <aside class="conversations-sidebar">
+            <div class="conversations-header">
+                <h2>Messages</h2>
+                <input type="text" class="search-box" placeholder="Search...">
+            </div>
+            <div class="conversations-list">
+                <div class="conversation-item active">
+                    <div class="conv-avatar">
+                        <span>AR</span>
+                        <div class="conv-online-indicator"></div>
+                    </div>
+                    <div class="conv-content">
+                        <div class="conv-header">
+                            <span class="conv-name">Ahmed Rashid</span>
+                            <span class="conv-time">2 min</span>
+                        </div>
+                        <div class="conv-preview">Yes, I'm interested in this...</div>
+                    </div>
+                </div>
+                <div class="conversation-item">
+                    <div class="conv-avatar av2">
+                        <span>SK</span>
+                        <div class="conv-online-indicator" style="background-color: #ccc;"></div>
+                    </div>
+                    <div class="conv-content">
+                        <div class="conv-header">
+                            <span class="conv-name">Saima Khatun</span>
+                            <span class="conv-time">1 hr</span>
+                        </div>
+                        <div class="conv-preview">Thank you for considering...</div>
+                    </div>
+                </div>
+                <div class="conversation-item">
+                    <div class="conv-avatar av3">
+                        <span>JD</span>
+                    </div>
+                    <div class="conv-content">
+                        <div class="conv-header">
+                            <span class="conv-name">Jannath Din</span>
+                            <span class="conv-time">3 hrs</span>
+                        </div>
+                        <div class="conv-preview">Are you available this week?</div>
+                    </div>
+                </div>
+                <div class="conversation-item">
+                    <div class="conv-avatar av4">
+                        <span>JC</span>
+                    </div>
+                    <div class="conv-content">
+                        <div class="conv-header">
+                            <span class="conv-name">Jannath Choudhury</span>
+                            <span class="conv-time">5 hrs</span>
+                        </div>
+                        <div class="conv-preview">Sounds great! When can we start...</div>
+                    </div>
+                </div>
+                <div class="conversation-item">
+                    <div class="conv-avatar av5">
+                        <span>RH</span>
+                    </div>
+                    <div class="conv-content">
+                        <div class="conv-header">
+                            <span class="conv-name">Rupa Hasan</span>
+                            <span class="conv-time">1 day</span>
+                        </div>
+                        <div class="conv-preview">Thanks for your interest in the...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <header class="chat-header">
+                <div class="chat-header-left">
+                    <div class="chat-header-avatar">AR</div>
+                    <div class="chat-header-info">
+                        <h3>Ahmed Rashid</h3>
+                        <p>Active now</p>
+                    </div>
+                </div>
+                <a href="#" id="backDashboardLink" style="background: none; border: none; color: #007AFF; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 14px; font-weight: 600; text-decoration: none;">Back to Dashboard</a>
+            </header>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message-group received">
+                    <div class="message received">
+                        Hello! I saw your tuition post for Mathematics. I'm a 3rd year student.
+                        <span class="message-time">10:30 AM</span>
+                    </div>
+                </div>
+                <div class="message-group sent">
+                    <div class="message sent">
+                        Hi Ahmed! Thanks for reaching out. Tell me about your experience.
+                        <span class="message-time">10:35 AM</span>
+                    </div>
+                </div>
+                <div class="message-group received">
+                    <div class="message received">
+                        I've been tutoring for 2 years. My students generally score A+ in math.
+                        <span class="message-time">10:38 AM</span>
+                    </div>
+                </div>
+                <div class="message-group sent">
+                    <div class="message sent">
+                        That's great! When are you available for classes?
+                        <span class="message-time">10:40 AM</span>
+                    </div>
+                </div>
+                <div class="message-group received">
+                    <div class="message received">
+                        I'm flexible with timings. Mostly available on weekends and evenings.
+                        <span class="message-time">10:42 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <form class="chat-input-form" id="messageForm">
+                    <textarea class="chat-input" id="messageInput" placeholder="Aa" rows="1"></textarea>
+                    <button type="submit" class="send-btn">📤</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!messageInput.value.trim()) return;
+
+            const group = document.createElement('div');
+            group.className = 'message-group sent';
+
+            const msg = document.createElement('div');
+            msg.className = 'message sent';
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            msg.innerHTML = `${messageInput.value}<span class="message-time">${time}</span>`;
+
+            group.appendChild(msg);
+            chatMessages.appendChild(group);
+            messageInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        // Conversation data
+        const conversations = [
+            { name: 'Ahmed Rashid', avatar: 'AR', messages: [
+                { type: 'received', text: 'Hello! I saw your tuition post for Mathematics. I\'m a 3rd year student.', time: '10:30 AM' },
+                { type: 'sent', text: 'Hi Ahmed! Thanks for reaching out. Tell me about your experience.', time: '10:35 AM' },
+                { type: 'received', text: 'I\'ve been tutoring for 2 years. My students generally score A+ in math.', time: '10:38 AM' },
+                { type: 'sent', text: 'That\'s great! When are you available for classes?', time: '10:40 AM' },
+                { type: 'received', text: 'I\'m flexible with timings. Mostly available on weekends and evenings.', time: '10:42 AM' }
+            ]},
+            { name: 'Saima Khatun', avatar: 'SK', messages: [
+                { type: 'received', text: 'Hi! I\'m interested in your tuition post.', time: '11:00 AM' },
+                { type: 'sent', text: 'Great! Tell me more about yourself.', time: '11:05 AM' },
+                { type: 'received', text: 'Thank you for considering my application.', time: '11:10 AM' }
+            ]},
+            { name: 'Jannath Din', avatar: 'JD', messages: [
+                { type: 'received', text: 'Are you available this week?', time: '12:00 PM' },
+                { type: 'sent', text: 'Yes, I\'m available on weekends.', time: '12:15 PM' }
+            ]},
+            { name: 'Jannath Choudhury', avatar: 'JC', messages: [
+                { type: 'received', text: 'Sounds great! When can we start?', time: '1:00 PM' },
+                { type: 'sent', text: 'We can start next week. Let\'s confirm the schedule.', time: '1:30 PM' }
+            ]},
+            { name: 'Rupa Hasan', avatar: 'RH', messages: [
+                { type: 'received', text: 'Thanks for your interest in the position.', time: '2:00 PM' }
+            ]}
+        ];
+
+        // Initialize conversations list click handlers
+        document.querySelectorAll('.conversation-item').forEach((item, index) => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const conv = conversations[index];
+                document.querySelector('.chat-header-avatar').textContent = conv.avatar;
+                document.querySelector('.chat-header-info h3').textContent = conv.name;
+                document.querySelector('.chat-header-info p').textContent = 'Active now';
+
+                chatMessages.innerHTML = '';
+                conv.messages.forEach(msg => {
+                    const group = document.createElement('div');
+                    group.className = 'message-group ' + msg.type;
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'message ' + msg.type;
+                    msgDiv.innerHTML = `${msg.text}<span class="message-time">${msg.time}</span>`;
+                    group.appendChild(msgDiv);
+                    chatMessages.appendChild(group);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        });
+
+        // Back to Dashboard
+        document.getElementById('backDashboardLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'tutor/dashboard.html';
+        });
+    </script>
+</body>
+</html>
